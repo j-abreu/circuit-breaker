@@ -13,7 +13,7 @@ class Database {
         const dbFileExists = existsSync(this.dbPath);
         if (!dbFileExists) {
             try {
-                writeFileSync(this.dbPath, "");
+                writeFileSync(this.dbPath, "{}");
                 console.info("[DATABASE] File created successfuly");
             } catch (err) {
                 throw new Error("[DATABASE] Could not create db file");

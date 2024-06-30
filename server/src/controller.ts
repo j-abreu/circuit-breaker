@@ -1,41 +1,85 @@
 import {Request, Response} from 'express';
 import Database from './database/database';
+import {StatusCodes} from 'http-status-codes';
+import logger from './logger/logger';
 
 class Controller {
-  private db;
+  private storage: Database;
 
   constructor() {
-    this.db = new Database();
+    this.storage = new Database();
   }
 
-  get(req: Request, res: Response) {
-    res.json({hello: 'world'}).end();
-  }
-
-  async testDatabase() {
+  async get(req: Request, res: Response) {
     try {
-      await this.db.insert('test1', 'test1Value');
-      const result = await this.db.getByKey('test1');
-      console.dir(result);
+      const {key} = req.params;
 
-      await this.db.update('test1', 'newTestValue');
+      const value = await this.storage.getByKey(key);
 
-      const newResult = await this.db.getByKey('test1');
-      console.log('New value: ', newResult);
+      const data = {
+        [key]: value,
+      };
 
-      console.log('Removing value');
-      await this.db.remove('test1');
-      try {
-        const removedValue = await this.db.getByKey('test1');
-
-        console.log('removed: ', removedValue);
-      } catch (err: any) {
-        console.log(err);
-      }
+      res.json(data).status(StatusCodes.OK).end();
     } catch (err: any) {
-      throw new Error(err.message);
+      logger.error(err.message);
+      res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({
+          message: err.message,
+        })
+        .end();
+    }
+  }
+
+  async post(req: Request, res: Response) {
+    try {
+      const {key, value} = req.body;
+
+      await this.storage.insert(key, value);
+
+      res.status(StatusCodes.CREATED).end();
+    } catch (err: any) {
+      res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({
+          message: err.message,
+        })
+        .end();
+    }
+  }
+
+  async patch(req: Request, res: Response) {
+    try {
+      const {key, newValue} = req.body;
+
+      await this.storage.update(key, newValue);
+
+      res.status(StatusCodes.OK).end();
+    } catch (err: any) {
+      res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({
+          message: err.message,
+        })
+        .end();
+    }
+  }
+
+  async remove(req: Request, res: Response) {
+    try {
+      const {key} = req.params;
+
+      await this.storage.remove(key);
+    } catch (err: any) {
+      res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({
+          message: err.message,
+        })
+        .end();
     }
   }
 }
 
-export default new Controller();
+export default Controller;
