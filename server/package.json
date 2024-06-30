@@ -18,14 +18,14 @@
   "description": "A key-value store web service for circuit-breaker pattern demo",
   "devDependencies": {
     "@types/express": "^4.17.21",
+    "@types/morgan": "^1.9.9",
     "@types/node": "20.12.7",
     "gts": "^5.3.1",
     "typescript": "^5.2.0"
   },
   "dependencies": {
     "express": "^4.19.2",
-    "express-winston": "^4.2.0",
     "http-status-codes": "^2.3.0",
-    "winston": "^3.13.0"
+    "morgan": "^1.10.0"
   }
 }
