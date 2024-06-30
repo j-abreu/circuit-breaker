@@ -10,6 +10,22 @@ class Controller {
     this.storage = new Database();
   }
 
+  async getAll(req: Request, res: Response) {
+    try {
+      const allEntries = await this.storage.getAll();
+      res.json(allEntries).end();
+    } catch (err: any) {
+      logger.error(err.message);
+
+      res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({
+          message: err.message,
+        })
+        .end();
+    }
+  }
+
   async get(req: Request, res: Response) {
     try {
       const {key} = req.params;
@@ -51,7 +67,8 @@ class Controller {
 
   async patch(req: Request, res: Response) {
     try {
-      const {key, newValue} = req.body;
+      const {value: newValue} = req.body;
+      const {key} = req.params;
 
       await this.storage.update(key, newValue);
 
@@ -71,6 +88,7 @@ class Controller {
       const {key} = req.params;
 
       await this.storage.remove(key);
+      res.status(StatusCodes.OK).end();
     } catch (err: any) {
       res
         .status(StatusCodes.INTERNAL_SERVER_ERROR)

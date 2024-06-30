@@ -41,17 +41,25 @@ class Database {
 
     private async save() {
         try {
-            console.log("Saving: ", JSON.stringify(this.db));
+            console.log("[DATABASE] Persisting database", JSON.stringify(this.db));
             fs.writeFile(this.dbPath, JSON.stringify(this.db));
         } catch (err: any) {
             throw new Error(`[DATABASE] Could not persist database\n${err.message}`);
         }
     }
 
+    async getAll() {
+        try {
+            return structuredClone(this.db);
+        } catch (err) {
+            throw new Error(`[DATABASE] Could not get all entries`);
+        }
+    }
+
     async getByKey(key: string) {
         try {
             if (this.db[key] == undefined) {
-                throw new Error("Key not found");
+                throw new Error("[DATABASE] Key not found");
             }
 
             return this.db[key];
@@ -72,7 +80,7 @@ class Database {
     async update(key: string, newValue: string | number) {
         try {
             if (this.db[key] == undefined) {
-                throw new Error("Key not Found");
+                throw new Error("[DATABASE] Key not Found");
             }
 
             this.db[key] = newValue;
