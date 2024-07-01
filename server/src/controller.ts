@@ -1,6 +1,6 @@
 import {Request, Response} from 'express';
 import Database from './database/database';
-import {ReasonPhrases, StatusCodes} from 'http-status-codes';
+import {getReasonPhrase, StatusCodes} from 'http-status-codes';
 import logger from './logger/logger';
 
 class Controller {
@@ -30,14 +30,15 @@ class Controller {
     try {
       const {key} = req.params;
 
+      // mechanism to force error
       if (key.startsWith('_')) {
-        const statusCode = StatusCodes.BAD_REQUEST;
+        const statusCode = StatusCodes.INTERNAL_SERVER_ERROR;
         return res
           .status(statusCode)
           .json({
             code: statusCode,
             status: 'Error',
-            message: ReasonPhrases.BAD_REQUEST,
+            message: getReasonPhrase(statusCode),
             data: null,
           })
           .end();
