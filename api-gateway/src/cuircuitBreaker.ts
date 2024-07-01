@@ -97,13 +97,9 @@ function handleInternalServerError(proxyRes: any, req: any, res: any) {
   }
 }
 
-export function handleProxyReq(proxyReq: any, req: any, res: any) {
-  console.log('[CIRCUIT BREAKER] Handling proxy request');
-}
+export function handleProxyReq(proxyReq: any, req: any, res: any) {}
 
 export function handleProxyRes(proxyRes: any, req: any, res: any) {
-  console.log('[CIRCUIT BREAKER] Handling proxy response');
-
   if (proxyRes.statusCode >= 500) {
     return handleInternalServerError(proxyRes, req, res);
   }

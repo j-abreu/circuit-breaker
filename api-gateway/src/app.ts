@@ -12,7 +12,7 @@ import proxyManager from './proxyManager';
 const app = express();
 
 app.use(cors()); // Enable CORS
-app.use(morgan('combined')); // Log HTTP requests
+app.use(morgan('dev')); // Log HTTP requests
 app.disable('x-powered-by'); // Hide Express server information
 app.use(helmet()); // Add security headers
 
