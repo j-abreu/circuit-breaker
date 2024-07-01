@@ -1,6 +1,6 @@
 import {Request, Response} from 'express';
 import Database from './database/database';
-import {StatusCodes} from 'http-status-codes';
+import {ReasonPhrases, StatusCodes} from 'http-status-codes';
 import logger from './logger/logger';
 
 class Controller {
@@ -30,16 +30,29 @@ class Controller {
     try {
       const {key} = req.params;
 
+      if (key.startsWith('_')) {
+        const statusCode = StatusCodes.BAD_REQUEST;
+        return res
+          .status(statusCode)
+          .json({
+            code: statusCode,
+            status: 'Error',
+            message: ReasonPhrases.BAD_REQUEST,
+            data: null,
+          })
+          .end();
+      }
+
       const value = await this.storage.getByKey(key);
 
       const data = {
         [key]: value,
       };
 
-      res.json(data).status(StatusCodes.OK).end();
+      return res.json(data).status(StatusCodes.OK).end();
     } catch (err: any) {
       logger.error(err.message);
-      res
+      return res
         .status(StatusCodes.INTERNAL_SERVER_ERROR)
         .json({
           message: err.message,
