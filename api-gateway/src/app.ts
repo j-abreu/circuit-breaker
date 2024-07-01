@@ -5,6 +5,9 @@ import helmet from 'helmet';
 import {createProxyMiddleware} from 'http-proxy-middleware';
 import services from './services';
 import circuitBreaker from './cuircuitBreaker';
+import {buildErrorResponse} from './errorHandling';
+import {StatusCodes} from 'http-status-codes';
+import proxyManager from './proxyManager';
 
 const app = express();
 
@@ -15,29 +18,18 @@ app.use(helmet()); // Add security headers
 
 // Set up proxy middleware for each service
 services.forEach(({route, target}) => {
-  // Proxy options
-  const proxyOptions = {
-    target,
-    changeOrigin: true,
-    pathRewrite: {
-      [`^${route}`]: '',
-    },
-  };
+  const proxyOptions = proxyManager.getProxyOptions(route, target);
 
-  // Proxing routes
-  app.use(route, createProxyMiddleware(proxyOptions));
+  // Add circuit breaker to each route while proxing
+  app.use(route, circuitBreaker, createProxyMiddleware(proxyOptions));
 });
 
 // Handle not found routes
 app.use((_req, res) => {
-  res.status(404).json({
-    code: 404,
-    status: 'Error',
-    message: 'Route not found.',
-    data: null,
-  });
-});
+  const status = StatusCodes.NOT_FOUND;
+  const errorResponse = buildErrorResponse(status, 'Route not found.');
 
-app.use(circuitBreaker);
+  res.status(status).json(errorResponse);
+});
 
 export default app;
