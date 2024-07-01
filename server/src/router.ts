@@ -4,6 +4,7 @@ import Controller from './controller';
 const controller = new Controller();
 const router = Router();
 
+router.get('/', (_req, res) => res.send('Hello world!'));
 router.get('/store', controller.getAll.bind(controller));
 router.get('/store/:key', controller.get.bind(controller));
 router.post('/store', controller.post.bind(controller));
