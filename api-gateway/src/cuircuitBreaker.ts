@@ -8,42 +8,93 @@ enum CircuitState {
   HalfOpen,
   Closed,
 }
-
-let state: CircuitState = CircuitState.Open;
-let errorCounter = 0;
+const DEFUALT_COUNT_TO_OPEN = 5;
+const DEFAULT_ERROR_COUNTER = 0;
 const MAX_ERROR_COUNT = 3;
 const TIME_WINDOW_IN_MS = 5 * 1000;
 const TIME_TO_HALF_OPEN_CIRCUIT_IN_MS = 10 * 1000;
+
+let state: CircuitState = CircuitState.Open;
+let errorCounter = 0;
+let countToOpen = 5;
+const decrementTimoutIds: Array<any> = [];
+
+function openCircuit() {
+  state = CircuitState.Open;
+  errorCounter = DEFAULT_ERROR_COUNTER;
+  console.log('[CIRCUIT BREAKER] Circuit is OPEN!');
+}
+
+function checkCanOpenCircuit() {
+  countToOpen -= 1;
+  console.log('[CIRCUIT BREAKER] Count to open:', countToOpen);
+
+  if (countToOpen === 0) {
+    openCircuit();
+  }
+}
+
+function halfOpenCircuit() {
+  console.log('[CIRCUIT BREAKER] Circuit is HALF-OPEN!');
+  state = CircuitState.HalfOpen;
+  countToOpen = DEFUALT_COUNT_TO_OPEN;
+}
 
 function closeCircuit() {
   state = CircuitState.Closed;
   console.log('[CIRCUIT BREAKER] Circuit CLOSED!');
 
   setTimeout(() => {
-    console.log('[CIRCUIT BREAKER] Circuit is HALF-OPEN!');
-    state = CircuitState.HalfOpen;
+    halfOpenCircuit();
   }, TIME_TO_HALF_OPEN_CIRCUIT_IN_MS);
+}
+
+function resetDecrementTimeouts() {
+  // clear each timeout
+  while (decrementTimoutIds.length) {
+    const id = decrementTimoutIds.pop();
+    clearTimeout(id);
+  }
+}
+
+function addDecrementTimeout() {
+  // decrement after some time
+  const timeoutId = setTimeout(() => {
+    errorCounter -= 1;
+    console.log('[CIRCUIT BREAKER] Error count:', errorCounter);
+  }, TIME_WINDOW_IN_MS);
+
+  // save timeout id
+  decrementTimoutIds.push(timeoutId);
 }
 
 function incrementErrorCounter() {
   errorCounter += 1;
   console.log('[CIRCUIT BREAKER] Error count:', errorCounter);
+  addDecrementTimeout();
 
   if (errorCounter >= MAX_ERROR_COUNT) {
     closeCircuit();
-    errorCounter = 0;
+    resetDecrementTimeouts();
     return;
   }
-
-  // decrement after some time
-  setTimeout(() => {
-    errorCounter -= 1;
-  }, TIME_WINDOW_IN_MS);
 }
 
 function handleInternalServerError(proxyRes: any, req: any, res: any) {
   console.log('[CIRCUIT BREAKER] Handling Internal Server Error');
-  incrementErrorCounter();
+  switch (state) {
+    case CircuitState.Open:
+      return incrementErrorCounter();
+
+    case CircuitState.HalfOpen:
+      return closeCircuit();
+
+    default:
+      console.error(
+        `[CIRCUIT BREAKER]: Internal server error with circuit in "${state}" state`
+      );
+      return closeCircuit();
+  }
 }
 
 export function handleProxyReq(proxyReq: any, req: any, res: any) {
@@ -53,8 +104,12 @@ export function handleProxyReq(proxyReq: any, req: any, res: any) {
 export function handleProxyRes(proxyRes: any, req: any, res: any) {
   console.log('[CIRCUIT BREAKER] Handling proxy response');
 
-  if (proxyRes.statusCode === 500) {
+  if (proxyRes.statusCode >= 500) {
     return handleInternalServerError(proxyRes, req, res);
+  }
+
+  if (state === CircuitState.HalfOpen) {
+    return checkCanOpenCircuit();
   }
 }
 
