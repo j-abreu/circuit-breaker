@@ -1,6 +1,5 @@
 import {Request, Response, NextFunction} from 'express';
-import {StatusCodes, ReasonPhrases} from 'http-status-codes';
-// eslint-disable-next-line
+import {StatusCodes} from 'http-status-codes';
 import {buildErrorResponse} from './errorHandling';
 
 enum CircuitState {
