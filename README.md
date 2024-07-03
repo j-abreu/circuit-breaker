@@ -8,9 +8,9 @@ In the `circuit-breaker` root directory, run:
 ```sh
 $ sh scripts/setup.sh
 ```
-After that, start the server from the `circuit-breaker/server/` directory:
+After that, start the server from the `circuit-breaker/storage-serice/` directory:
 ```sh
-$ cd server
+$ cd storage-service
 $ npm run start
 ```
 
