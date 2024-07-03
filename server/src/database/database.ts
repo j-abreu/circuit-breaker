@@ -1,4 +1,4 @@
-import {promises as fs, existsSync, writeFile, readFileSync, writeFileSync} from "fs";
+import {promises as fs, existsSync, readFileSync, writeFileSync} from "fs";
 
 
 export enum DatabaseError {

@@ -10,7 +10,7 @@ class Controller {
     this.storage = new Database();
   }
 
-  handleDatabaseError(req: Request, res: Response, err: any) {
+  handleDatabaseError(_req: Request, res: Response, err: any) {
     logger.error(err.message);
 
     if (err.message === DatabaseError.NOT_FOUND) {
@@ -29,7 +29,7 @@ class Controller {
       .end();
   }
 
-  async getAll(req: Request, res: Response) {
+  async getAll(_req: Request, res: Response) {
     try {
       const allEntries = await this.storage.getAll();
       res.json(allEntries).end();
@@ -81,14 +81,9 @@ class Controller {
 
       await this.storage.insert(key, value);
 
-      res.status(StatusCodes.CREATED).end();
+      return res.status(StatusCodes.CREATED).end();
     } catch (err: any) {
-      res
-        .status(StatusCodes.INTERNAL_SERVER_ERROR)
-        .json({
-          message: err.message,
-        })
-        .end();
+      return this.handleDatabaseError(req, res, err);
     }
   }
 
@@ -99,14 +94,9 @@ class Controller {
 
       await this.storage.update(key, newValue);
 
-      res.status(StatusCodes.OK).end();
+      return res.status(StatusCodes.OK).end();
     } catch (err: any) {
-      res
-        .status(StatusCodes.INTERNAL_SERVER_ERROR)
-        .json({
-          message: err.message,
-        })
-        .end();
+      return this.handleDatabaseError(req, res, err);
     }
   }
 
@@ -115,14 +105,9 @@ class Controller {
       const {key} = req.params;
 
       await this.storage.remove(key);
-      res.status(StatusCodes.OK).end();
+      return res.status(StatusCodes.OK).end();
     } catch (err: any) {
-      res
-        .status(StatusCodes.INTERNAL_SERVER_ERROR)
-        .json({
-          message: err.message,
-        })
-        .end();
+      return this.handleDatabaseError(req, res, err);
     }
   }
 }
