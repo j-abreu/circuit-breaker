@@ -86,7 +86,7 @@ class Database {
     async update(key: string, newValue: string | number) {
         try {
             if (this.db[key] == undefined) {
-                throw new Error("[DATABASE] Key not Found");
+                throw new Error(DatabaseError.NOT_FOUND);
             }
 
             this.db[key] = newValue;
