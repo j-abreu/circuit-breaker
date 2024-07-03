@@ -1,13 +1,9 @@
 echo "Starting setup..."
 
-echo "Storage service setup"
-cd server
-npm install
-echo "Finished!"
+cd storage-service/
+sh scripts/setup.sh
 
-echo "API Gateway setup"
-cd ../api-gateway
-npm install
-echo "Finished!"
+cd api-gateway/
+sh scripts/setup.sh
 
 echo "Good to go!"
