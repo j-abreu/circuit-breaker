@@ -1,5 +1,11 @@
 import {promises as fs, existsSync, writeFile, readFileSync, writeFileSync} from "fs";
 
+
+export enum DatabaseError {
+    NOT_FOUND = 'NOT_FOUND',
+}
+
+
 class Database {
     private dbPath = process.env.DB_PATH || "";
     private db: any;
@@ -59,7 +65,7 @@ class Database {
     async getByKey(key: string) {
         try {
             if (this.db[key] == undefined) {
-                throw new Error("[DATABASE] Key not found");
+                throw new Error(DatabaseError.NOT_FOUND);
             }
 
             return this.db[key];

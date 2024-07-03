@@ -1,5 +1,5 @@
 import {Request, Response} from 'express';
-import Database from './database/database';
+import Database, {DatabaseError} from './database/database';
 import {getReasonPhrase, StatusCodes} from 'http-status-codes';
 import logger from './logger/logger';
 
@@ -8,6 +8,25 @@ class Controller {
 
   constructor() {
     this.storage = new Database();
+  }
+
+  handleDatabaseError(req: Request, res: Response, err: any) {
+    logger.error(err.message);
+
+    if (err.message === DatabaseError.NOT_FOUND) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        status: 'Error',
+        message: 'Key not found',
+      });
+    }
+
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({
+        status: 'Error',
+        message: err.message,
+      })
+      .end();
   }
 
   async getAll(req: Request, res: Response) {
@@ -46,19 +65,13 @@ class Controller {
 
       const value = await this.storage.getByKey(key);
 
-      const data = {
+      const responseData = {
         [key]: value,
       };
 
-      return res.json(data).status(StatusCodes.OK).end();
+      return res.json(responseData).status(StatusCodes.OK).end();
     } catch (err: any) {
-      logger.error(err.message);
-      return res
-        .status(StatusCodes.INTERNAL_SERVER_ERROR)
-        .json({
-          message: err.message,
-        })
-        .end();
+      return this.handleDatabaseError(req, res, err);
     }
   }
 
