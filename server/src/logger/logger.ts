@@ -3,7 +3,7 @@ import winston from 'winston';
 const logger = winston.createLogger({
   level: 'info',
   format: winston.format.json(),
-  defaultMeta: {service: 'user-service'},
+  defaultMeta: {service: 'store-service'},
   silent: false,
   transports: [
     //
