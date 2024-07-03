@@ -94,7 +94,7 @@ function incrementErrorCounter() {
   }
 }
 
-function handleInternalServerError(proxyRes: any, req: any, res: any) {
+function handleInternalServerError(_proxyRes: any, _req: any, _res: any) {
   console.log('[CIRCUIT BREAKER] Handling Internal Server Error');
 
   switch (circuitState) {
@@ -112,7 +112,7 @@ function handleInternalServerError(proxyRes: any, req: any, res: any) {
   }
 }
 
-export function handleProxyReq(proxyReq: any, req: any, res: any) {}
+export function handleProxyReq(_proxyReq: any, _req: any, _res: any) {}
 
 export function handleProxyRes(proxyRes: any, req: any, res: any) {
   if (proxyRes.statusCode >= 500) {

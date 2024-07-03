@@ -2,7 +2,7 @@ import {StatusCodes} from 'http-status-codes';
 import {handleProxyReq, handleProxyRes} from './cuircuitBreaker';
 import {buildErrorResponse} from './errorHandling';
 
-function handleProxyError(proxyErr: any, req: any, res: any) {
+function handleProxyError(proxyErr: any, _req: any, res: any) {
   console.log(`[PROXY] Proxy failed with error ${proxyErr.message}`);
 
   const statusCode = StatusCodes.INTERNAL_SERVER_ERROR;
